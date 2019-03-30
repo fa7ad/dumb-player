@@ -27,15 +27,18 @@ public class PlayerFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(() -> {
-			try {
-				PlayerFrame frame = new PlayerFrame();
-				frame.setVisible(true);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					PlayerFrame frame = new PlayerFrame();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 
+			}
 		});
+
 	}
 
 	/**
@@ -111,7 +114,7 @@ public class PlayerFrame extends JFrame {
 		MaximizeButton.setHorizontalAlignment(SwingConstants.LEFT);
 		MaximizeButton.setBackground(Color.DARK_GRAY);
 		contentPane.add(MaximizeButton);
-		
+
 		JLabel PlayPauseButton = new JLabel("");
 		PlayPauseButton.setVerticalAlignment(SwingConstants.BOTTOM);
 		PlayPauseButton.setHorizontalAlignment(SwingConstants.LEFT);
