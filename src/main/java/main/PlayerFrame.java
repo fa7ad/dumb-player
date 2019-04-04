@@ -1,27 +1,23 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.UIManager.LookAndFeelInfo;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.awt.event.*;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.ImageIcon;
-import javax.swing.SpringLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.border.MatteBorder;
 
 public class PlayerFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private boolean maximized = false;
+	private boolean playing = false;
 
 	/**
 	 * Launch the application.
@@ -30,6 +26,12 @@ public class PlayerFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				        if ("Nimbus".equals(info.getName())) {
+				            UIManager.setLookAndFeel(info.getClassName());
+				            break;
+				        }
+				    }
 					PlayerFrame frame = new PlayerFrame();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -45,10 +47,11 @@ public class PlayerFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public PlayerFrame() {
+		setResizable(false); // TODO: remove this
 		setTitle("DumbPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setUndecorated(true);
-		setBounds(100, 100, 720, 530);
+		setSize(640, 530);
 		contentPane = new JPanel();
 		contentPane.setForeground(Color.WHITE);
 		contentPane.setBackground(Color.DARK_GRAY);
@@ -116,11 +119,38 @@ public class PlayerFrame extends JFrame {
 		contentPane.add(MaximizeButton);
 
 		JLabel PlayPauseButton = new JLabel("");
+		PlayPauseButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				playing = !playing;
+				PlayPauseButton.setIcon(
+						new ImageIcon(getClass().getResource("/play-pause" + (playing ? "-active" : "") + ".png")));
+			}
+		});
 		PlayPauseButton.setVerticalAlignment(SwingConstants.BOTTOM);
 		PlayPauseButton.setHorizontalAlignment(SwingConstants.LEFT);
 		PlayPauseButton.setIcon(new ImageIcon(getClass().getResource("/play-pause.png")));
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, PlayPauseButton, -4, SpringLayout.SOUTH, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.WEST, PlayPauseButton, 0, SpringLayout.WEST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.WEST, PlayPauseButton, 4, SpringLayout.WEST, contentPane);
 		contentPane.add(PlayPauseButton);
+
+		JSlider PositionSlider = new JSlider(0, 1000);
+		PositionSlider.setBorder(null);
+		PositionSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (PositionSlider.getValueIsAdjusting()) {
+					//long duration = Player.queryDuration(TimeUnit.NANOSECONDS);
+					double position = PositionSlider.getValue() / 1000.0;
+					//Player.seek((long) (position * duration), TimeUnit.NANOSECONDS);
+				}
+			}
+		});
+		PositionSlider.setValue(0);
+		PositionSlider.setBackground(Color.DARK_GRAY);
+		sl_contentPane.putConstraint(SpringLayout.WEST, PositionSlider, 10, SpringLayout.EAST, PlayPauseButton);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, PositionSlider, -2, SpringLayout.SOUTH, PlayPauseButton);
+		sl_contentPane.putConstraint(SpringLayout.EAST, PositionSlider, -10, SpringLayout.EAST, contentPane);
+		contentPane.add(PositionSlider);
+
 	}
 }
