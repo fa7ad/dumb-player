@@ -26,6 +26,8 @@ public class PlayerFrame extends JFrame {
 	private JPanel contentPane;
 	private boolean maximized = false;
 	private PlayBin playbin;
+	private final JFileChooser fileChooser = new JFileChooser();
+
 
 	/**
 	 * Launch the application.
@@ -135,7 +137,6 @@ public class PlayerFrame extends JFrame {
 		openFileButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
 				int returnValue = fileChooser.showOpenDialog(contentPane);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 					playbin.stop();
@@ -151,7 +152,6 @@ public class PlayerFrame extends JFrame {
 			private static final long serialVersionUID = 1L;
 
 			public void actionPerformed(ActionEvent evt) {
-				JFileChooser fileChooser = new JFileChooser();
 				int returnValue = fileChooser.showOpenDialog(contentPane);
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 					playbin.stop();
