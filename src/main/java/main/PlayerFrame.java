@@ -144,7 +144,24 @@ public class PlayerFrame extends JFrame {
 				}
 			}
 		});
-		openFileButton.setToolTipText("Open File");
+
+		openFileButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK), "open");
+		openFileButton.getActionMap().put("open", new AbstractAction("open") {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent evt) {
+				JFileChooser fileChooser = new JFileChooser();
+				int returnValue = fileChooser.showOpenDialog(contentPane);
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					playbin.stop();
+					playbin.setURI(fileChooser.getSelectedFile().toURI());
+					playbin.play();
+				}
+			}
+		});
+
+		openFileButton.setToolTipText("Open File (Ctrl + O)");
 		openFileButton.setIcon(new ImageIcon(getClass().getResource("/open-file.png")));
 		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, 0, SpringLayout.EAST, contentPane);
 		contentPane.add(openFileButton);
@@ -154,7 +171,7 @@ public class PlayerFrame extends JFrame {
 		windowTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		sl_contentPane.putConstraint(SpringLayout.NORTH, windowTitle, 0, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, windowTitle, 6, SpringLayout.EAST, maximizeButton);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, windowTitle, 20, SpringLayout.NORTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, windowTitle, 16, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.EAST, windowTitle, -6, SpringLayout.WEST, openFileButton);
 		contentPane.add(windowTitle);
 
@@ -207,9 +224,31 @@ public class PlayerFrame extends JFrame {
 						new ImageIcon(getClass().getResource("/play-pause" + (playing ? "-active" : "") + ".png")));
 			}
 		});
+
+		playPauseButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),
+				"playpause");
+		playPauseButton.getActionMap().put("playpause", new AbstractAction("playpause") {
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+				boolean playing = playbin.isPlaying();
+
+				if (playing) {
+					playbin.pause();
+				} else {
+					playbin.play();
+				}
+
+				playPauseButton.setIcon(
+						new ImageIcon(getClass().getResource("/play-pause" + (playing ? "-active" : "") + ".png")));
+
+			}
+		});
+
 		playPauseButton.setVerticalAlignment(SwingConstants.BOTTOM);
 		playPauseButton.setHorizontalAlignment(SwingConstants.LEFT);
 		playPauseButton.setIcon(new ImageIcon(getClass().getResource("/play-pause.png")));
+		playPauseButton.setToolTipText("Play/Pause (SPACE)");
 		contentPane.add(playPauseButton);
 
 		SimpleVideoComponent videoOutput = new SimpleVideoComponent();
