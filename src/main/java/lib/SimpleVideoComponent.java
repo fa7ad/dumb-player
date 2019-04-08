@@ -328,7 +328,7 @@ public class SimpleVideoComponent extends JComponent {
 			update(currentImage.getWidth(), currentImage.getHeight());
 		}
 
-		@Override
+		//@Override
 		public FlowReturn newSample(AppSink elem) {
 			Sample sample = elem.pullSample();
 			Structure capsStruct = sample.getCaps().getStructure(0);
@@ -344,7 +344,7 @@ public class SimpleVideoComponent extends JComponent {
 			return FlowReturn.OK;
 		}
 
-		@Override
+		//@Override
 		public FlowReturn newPreroll(AppSink elem) {
 			Sample sample = elem.pullPreroll();
 			Structure capsStruct = sample.getCaps().getStructure(0);

@@ -12,10 +12,13 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
 import lib.SimpleVideoComponent;
+import lib.ComponentMover;
 import lib.ComponentResizer;
 
 import org.freedesktop.gstreamer.Gst;
 import org.freedesktop.gstreamer.elements.PlayBin;
+
+import com.sun.jna.Platform;
 
 public class PlayerFrame extends JFrame {
 
@@ -30,9 +33,12 @@ public class PlayerFrame extends JFrame {
 	public static void main(String[] args) {
 		System.setProperty("awt.useSystemAAFontSettings", "lcd");
 		System.setProperty("swing.aatext", "true");
+		if (Platform.isWindows()) {
+			System.setProperty("gstreamer.GstNative.nameFormats", "%s-1.0-0|%s-1.0|%s-0|%s|lib%s|lib%s-0");
+		}
 		Gst.init();
+
 		EventQueue.invokeLater(new Runnable() {
-			@Override
 			public void run() {
 				try {
 					for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -61,30 +67,25 @@ public class PlayerFrame extends JFrame {
 		setUndecorated(true);
 		setSize(640, 530);
 
-		ComponentResizer cr = new ComponentResizer();
-		cr.registerComponent(this);
-
 		contentPane = new JPanel();
 		contentPane.setForeground(Color.WHITE);
 		contentPane.setBackground(Color.DARK_GRAY);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		SpringLayout sl_contentPane = new SpringLayout();
+
+		final SpringLayout sl_contentPane = new SpringLayout();
 		contentPane.setLayout(sl_contentPane);
 
-		JLabel closeButton = new JLabel("");
+		final JLabel closeButton = new JLabel("");
 		closeButton.addMouseListener(new MouseAdapter() {
-			@Override
 			public void mouseEntered(MouseEvent e) {
 				closeButton.setIcon(new ImageIcon(getClass().getResource("/close-active.png")));
 			}
 
-			@Override
 			public void mouseClicked(MouseEvent e) {
 				System.exit(0);
 			}
 
-			@Override
 			public void mouseExited(MouseEvent e) {
 				closeButton.setIcon(new ImageIcon(getClass().getResource("/close.png")));
 			}
@@ -101,7 +102,7 @@ public class PlayerFrame extends JFrame {
 		closeButton.setSize(16, 16);
 		contentPane.add(closeButton);
 
-		JLabel maximizeButton = new JLabel("");
+		final JLabel maximizeButton = new JLabel("");
 		maximizeButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseEntered(MouseEvent e) {
@@ -129,24 +130,35 @@ public class PlayerFrame extends JFrame {
 		maximizeButton.setBackground(Color.DARK_GRAY);
 		contentPane.add(maximizeButton);
 
-		JLabel windowTitle = new JLabel("DumbPlayer");
-		sl_contentPane.putConstraint(SpringLayout.NORTH, windowTitle, 0, SpringLayout.NORTH, closeButton);
-		int pad = (contentPane.getWidth() / 2) - (windowTitle.getText().length() * 3);
-		sl_contentPane.putConstraint(SpringLayout.WEST, windowTitle, pad, SpringLayout.WEST, contentPane);
-		windowTitle.setFont(UIManager.getFont("defaultFont"));
-		windowTitle.setBackground(Color.DARK_GRAY);
-		windowTitle.setForeground(Color.WHITE);
-		windowTitle.setVerticalAlignment(SwingConstants.TOP);
-		windowTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(windowTitle);
-		contentPane.addComponentListener(new ComponentAdapter() {
-			public void componentResized(ComponentEvent evt) {
-				int pad = (contentPane.getWidth() / 2) - (windowTitle.getText().length() * 3);
-				sl_contentPane.putConstraint(SpringLayout.WEST, windowTitle, pad, SpringLayout.WEST, contentPane);
+		JLabel openFileButton = new JLabel("");
+		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, 0, SpringLayout.EAST, contentPane);
+		openFileButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				int returnValue = fileChooser.showOpenDialog(contentPane);
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					playbin.stop();
+					playbin.setURI(fileChooser.getSelectedFile().toURI());
+					playbin.play();
+				}
 			}
 		});
+		openFileButton.setToolTipText("Open File");
+		openFileButton.setIcon(new ImageIcon(getClass().getResource("/open-file.png")));
+		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, 0, SpringLayout.EAST, contentPane);
+		contentPane.add(openFileButton);
 
-		JSlider positionSlider = new JSlider(0, 1000);
+		JLabel windowTitle = new JLabel("Dumb Player");
+		windowTitle.setForeground(Color.WHITE);
+		windowTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		sl_contentPane.putConstraint(SpringLayout.NORTH, windowTitle, 0, SpringLayout.NORTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.WEST, windowTitle, 6, SpringLayout.EAST, maximizeButton);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, windowTitle, 20, SpringLayout.NORTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, windowTitle, -6, SpringLayout.WEST, openFileButton);
+		contentPane.add(windowTitle);
+
+		final JSlider positionSlider = new JSlider(0, 1000);
 		positionSlider.setBorder(null);
 		positionSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -163,7 +175,6 @@ public class PlayerFrame extends JFrame {
 		contentPane.add(positionSlider);
 
 		new Timer(50, new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!positionSlider.getValueIsAdjusting() && playbin.isPlaying()) {
 					long dur = playbin.queryDuration(TimeUnit.NANOSECONDS);
@@ -176,7 +187,7 @@ public class PlayerFrame extends JFrame {
 			}
 		}).start();
 
-		JLabel playPauseButton = new JLabel("");
+		final JLabel playPauseButton = new JLabel("");
 		sl_contentPane.putConstraint(SpringLayout.WEST, positionSlider, 10, SpringLayout.EAST, playPauseButton);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, positionSlider, -2, SpringLayout.SOUTH, playPauseButton);
 		sl_contentPane.putConstraint(SpringLayout.WEST, playPauseButton, 4, SpringLayout.WEST, contentPane);
@@ -201,24 +212,6 @@ public class PlayerFrame extends JFrame {
 		playPauseButton.setIcon(new ImageIcon(getClass().getResource("/play-pause.png")));
 		contentPane.add(playPauseButton);
 
-		JLabel openFileButton = new JLabel("");
-		openFileButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-				int returnValue = fileChooser.showOpenDialog(contentPane);
-				if (returnValue == JFileChooser.APPROVE_OPTION) {
-					playbin.stop();
-					playbin.setURI(fileChooser.getSelectedFile().toURI());
-					playbin.play();
-				}
-			}
-		});
-		openFileButton.setToolTipText("Open File");
-		openFileButton.setIcon(new ImageIcon(getClass().getResource("/open-file.png")));
-		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, 0, SpringLayout.EAST, contentPane);
-		contentPane.add(openFileButton);
-
 		SimpleVideoComponent videoOutput = new SimpleVideoComponent();
 		sl_contentPane.putConstraint(SpringLayout.NORTH, videoOutput, 6, SpringLayout.SOUTH, closeButton);
 		sl_contentPane.putConstraint(SpringLayout.WEST, videoOutput, 0, SpringLayout.WEST, closeButton);
@@ -226,7 +219,12 @@ public class PlayerFrame extends JFrame {
 		sl_contentPane.putConstraint(SpringLayout.EAST, videoOutput, 0, SpringLayout.EAST, openFileButton);
 		contentPane.add(videoOutput);
 
-		playbin = new PlayBin("Player");
+		ComponentResizer cr = new ComponentResizer();
+		cr.registerComponent(this);
+		ComponentMover cm = new ComponentMover(this, windowTitle);
+		cm.setAutoLayout(true);
+
+		playbin = new PlayBin("GstDumbPlayer");
 		playbin.setVideoSink(videoOutput.getElement());
 
 	}
