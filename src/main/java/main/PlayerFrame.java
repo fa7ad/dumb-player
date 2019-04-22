@@ -5,6 +5,7 @@ import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import java.awt.event.*;
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.border.EmptyBorder;
@@ -28,7 +29,6 @@ public class PlayerFrame extends JFrame {
 	private PlayBin playbin;
 	private final JFileChooser fileChooser = new JFileChooser();
 
-
 	/**
 	 * Launch the application.
 	 */
@@ -40,23 +40,22 @@ public class PlayerFrame extends JFrame {
 		}
 		Gst.init();
 
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-						if ("Nimbus".equals(info.getName())) {
-							UIManager.setLookAndFeel(info.getClassName());
-							break;
-						}
-					}
-
-					PlayerFrame frame = new PlayerFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+		try {
+			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					break;
 				}
 			}
-		});
+
+			PlayerFrame frame = new PlayerFrame();
+			frame.setVisible(true);
+			if (args.length > 0) {
+				frame.openFile(args[0]);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -193,6 +192,7 @@ public class PlayerFrame extends JFrame {
 
 		new Timer(50, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (playbin == null || positionSlider == null) return;
 				if (!positionSlider.getValueIsAdjusting() && playbin.isPlaying()) {
 					long dur = playbin.queryDuration(TimeUnit.NANOSECONDS);
 					long pos = playbin.queryPosition(TimeUnit.NANOSECONDS);
@@ -266,5 +266,12 @@ public class PlayerFrame extends JFrame {
 		playbin = new PlayBin("GstDumbPlayer");
 		playbin.setVideoSink(videoOutput.getElement());
 
+	}
+
+	public void openFile(String file) {
+		File f = new File(file);
+		playbin.stop();
+		playbin.setURI(f.toURI());
+		playbin.play();
 	}
 }
