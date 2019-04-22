@@ -33,3 +33,6 @@ A small GStreamer based video player created using Java (Swing).
   2. Clone this Repo
   3. Open the project in Eclipse
   4. Click Build and Run
+  
+## LICENSE
+GNU General Public License 3.0
