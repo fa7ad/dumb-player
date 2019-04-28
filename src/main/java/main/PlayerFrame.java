@@ -2,15 +2,12 @@ package main;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import java.awt.event.*;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
-
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 import lib.SimpleVideoComponent;
 
@@ -25,26 +22,28 @@ public class PlayerFrame extends JFrame {
 	private JPanel contentPane;
 	private PlayBin playbin;
 	private final JFileChooser fileChooser = new JFileChooser();
+	
+	public static void initialize (boolean windows) throws Exception {
+		System.setProperty("awt.useSystemAAFontSettings", "lcd");
+		System.setProperty("swing.aatext", "true");
+		if (windows) {
+			System.setProperty("gstreamer.GstNative.nameFormats", "%s-1.0-0|%s-1.0|%s-0|%s|lib%s|lib%s-0");
+		}
+		for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+			if ("Nimbus".equals(info.getName())) {
+				UIManager.setLookAndFeel(info.getClassName());
+				break;
+			}
+		}
+	}
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		System.setProperty("awt.useSystemAAFontSettings", "lcd");
-		System.setProperty("swing.aatext", "true");
-		if (Platform.isWindows()) {
-			System.setProperty("gstreamer.GstNative.nameFormats", "%s-1.0-0|%s-1.0|%s-0|%s|lib%s|lib%s-0");
-		}
 		Gst.init();
-
 		try {
-			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-				if ("Nimbus".equals(info.getName())) {
-					UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-
+			initialize(Platform.isWindows());
 			PlayerFrame frame = new PlayerFrame();
 			frame.setVisible(true);
 			if (args.length > 0) {
@@ -62,20 +61,19 @@ public class PlayerFrame extends JFrame {
 	public PlayerFrame() {
 		setTitle("DumbPlayer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//setUndecorated(true);
 		setSize(640, 530);
 
 		contentPane = new JPanel();
 		contentPane.setForeground(Color.WHITE);
 		contentPane.setBackground(Color.DARK_GRAY);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
 		setContentPane(contentPane);
 
 		final SpringLayout sl_contentPane = new SpringLayout();
 		contentPane.setLayout(sl_contentPane);
 		
 		JLabel openFileButton = new JLabel("");
-		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, -11, SpringLayout.EAST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, -8, SpringLayout.EAST, contentPane);
 		openFileButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -105,13 +103,13 @@ public class PlayerFrame extends JFrame {
 
 		openFileButton.setToolTipText("Open File (Ctrl + O)");
 		openFileButton.setIcon(new ImageIcon(getClass().getResource("/open-file.png")));
-		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, 0, SpringLayout.EAST, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, -4, SpringLayout.EAST, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.SOUTH, openFileButton, -8, SpringLayout.SOUTH, contentPane);
 		contentPane.add(openFileButton);
 
 		final JLabel playPauseButton = new JLabel("");
 		sl_contentPane.putConstraint(SpringLayout.WEST, playPauseButton, 4, SpringLayout.WEST, contentPane);
-		sl_contentPane.putConstraint(SpringLayout.SOUTH, playPauseButton, -4, SpringLayout.SOUTH, contentPane);
+		sl_contentPane.putConstraint(SpringLayout.SOUTH, playPauseButton, -6, SpringLayout.SOUTH, contentPane);
 		playPauseButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
