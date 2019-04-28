@@ -1,7 +1,7 @@
 # dumb-player
 A small GStreamer based video player created using Java (Swing).
 
-[![DumbPlayer](https://imgur.com/BMqkCHn.png)](https://github.com/fa7ad/dumb-player/)
+[![DumbPlayer](https://i.imgur.com/Q3B7efP.png)](https://github.com/fa7ad/dumb-player/)
 
 ## About the project
 
