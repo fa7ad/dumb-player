@@ -3,10 +3,13 @@ package main;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import java.awt.event.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import lib.SimpleVideoComponent;
@@ -22,8 +25,8 @@ public class PlayerFrame extends JFrame {
 	private JPanel contentPane;
 	private PlayBin playbin;
 	private final JFileChooser fileChooser = new JFileChooser();
-	
-	public static void initialize (boolean windows) throws Exception {
+
+	public static void initialize(boolean windows) throws Exception {
 		System.setProperty("awt.useSystemAAFontSettings", "lcd");
 		System.setProperty("swing.aatext", "true");
 		if (windows) {
@@ -71,7 +74,21 @@ public class PlayerFrame extends JFrame {
 
 		final SpringLayout sl_contentPane = new SpringLayout();
 		contentPane.setLayout(sl_contentPane);
-		
+
+		final String[] audioExts = new String[] { "flac", "aac", "ogg", "mp3", "m4a", "wav" };
+		final String[] videoExts = new String[] { "asf", "avi", "3gp", "mp4", "mov", "flv", "mpg", "ts", "mkv", "webm",
+				"mxf", "ogg" };
+		final ArrayList<String> extensions = new ArrayList<>();
+		extensions.addAll(Arrays.asList(audioExts));
+		extensions.addAll(Arrays.asList(videoExts));
+
+		final String[] avExts = new String[extensions.size()];
+		extensions.toArray(avExts);
+
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Video File", videoExts));
+		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Audio File", audioExts));
+		fileChooser.setFileFilter(new FileNameExtensionFilter("Audio/Video File", avExts));
+
 		JLabel openFileButton = new JLabel("");
 		sl_contentPane.putConstraint(SpringLayout.EAST, openFileButton, -8, SpringLayout.EAST, contentPane);
 		openFileButton.addMouseListener(new MouseAdapter() {
@@ -151,7 +168,7 @@ public class PlayerFrame extends JFrame {
 		playPauseButton.setIcon(new ImageIcon(getClass().getResource("/play-pause.png")));
 		playPauseButton.setToolTipText("Play/Pause (SPACE)");
 		contentPane.add(playPauseButton);
-		
+
 		final JSlider positionSlider = new JSlider(0, 1000);
 		sl_contentPane.putConstraint(SpringLayout.EAST, positionSlider, -6, SpringLayout.WEST, openFileButton);
 		sl_contentPane.putConstraint(SpringLayout.WEST, positionSlider, 6, SpringLayout.EAST, playPauseButton);
@@ -172,13 +189,18 @@ public class PlayerFrame extends JFrame {
 
 		new Timer(50, new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (playbin == null || positionSlider == null) return;
+				if (playbin == null || positionSlider == null)
+					return;
 				if (!positionSlider.getValueIsAdjusting() && playbin.isPlaying()) {
 					long dur = playbin.queryDuration(TimeUnit.NANOSECONDS);
 					long pos = playbin.queryPosition(TimeUnit.NANOSECONDS);
 					if (dur > 0) {
 						double relPos = (double) pos / dur;
 						positionSlider.setValue((int) (relPos * 1000));
+					}
+					if (dur == pos && dur > 0) {
+						playbin.seek(0);
+						playbin.stop();
 					}
 				}
 			}
