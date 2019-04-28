@@ -26,7 +26,7 @@ A small GStreamer based video player created using Java (Swing).
   2. Install Gstreamer
   3. **WINDOWS Only**: Add gstreamer to PATH
   4. Run it:
-    * From CLI: `java -jar DumbPlayer-1.0.0-RC2.jar some-video.mp4`
+    * From CLI: `java -jar DumbPlayer-1.0.0-RC3.jar some-video.mp4`
     * Or just execute the JAR file and click the Open file button or Press <kbd>Ctrl</kbd>+<kbd>O</kbd>
 * **Option 2**: Compile it yourself
   1. Follow instructions 1 through 3 from **Option 1**
