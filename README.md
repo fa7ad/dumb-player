@@ -13,7 +13,7 @@ A small GStreamer based video player created using Java (Swing).
 
 **Runtime Dependencies**:
 
-* Gstreamer (1.12*)  
+* Gstreamer (1.12+\*)  
   Any 1.10+ version will work on Linux. Windows needs [this specific version](https://gstreamer.freedesktop.org/data/pkg/windows/1.12.0/gstreamer-1.0-x86_64-1.12.0.msi). Other future releases may work this is the one I found working in my tests.
 
 **Recommended Utilities**:  
@@ -26,7 +26,7 @@ A small GStreamer based video player created using Java (Swing).
   2. Install Gstreamer
   3. **WINDOWS Only**: Add gstreamer to PATH
   4. Run it:
-    * From CLI: `java -jar DumbPlayer-1.0.0-RC3.jar some-video.mp4`
+    * From CLI: `java -jar DumbPlayer-1.0.0-RC4.jar some-video.mp4`
     * Or just execute the JAR file and click the Open file button or Press <kbd>Ctrl</kbd>+<kbd>O</kbd>
 * **Option 2**: Compile it yourself
   1. Follow instructions 1 through 3 from **Option 1**
